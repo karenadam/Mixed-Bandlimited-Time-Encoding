@@ -1,0 +1,17 @@
+[
+  "Multi-Channel-Time-Encoding/Tests/test_signal.py::TestBandlimitedSignal::()::test_integral",
+  "Multi-Channel-Time-Encoding/Tests/test_signal.py::TestPiecewiseConstantSignal::()::test_sampling",
+  "Multi-Channel-Time-Encoding/Tests/test_signal.py::TestPiecewiseConstantSignal::()::test_sampling2",
+  "Multi-Channel-Time-Encoding/Tests/test_signal.py::TestLPFPCSsignal::()::test_sampling",
+  "Multi-Channel-Time-Encoding/Tests/test_time_encoder.py::TestTimeEncoderSingleSignalSingleChannel::()::test_time_encoder_creator",
+  "Multi-Channel-Time-Encoding/Tests/test_time_encoder.py::TestTimeEncoderSingleSignalSingleChannel::()::test_can_reconstruct_standard_encoding",
+  "Multi-Channel-Time-Encoding/Tests/test_time_encoder.py::TestTimeEncoderSingleSignalSingleChannel::()::test_can_reconstruct_precise_encoding",
+  "Multi-Channel-Time-Encoding/Tests/test_time_encoder.py::TestTimeEncoderSingleSignalMultiChannel::()::test_can_reconstruct_standard_encoding_ex1",
+  "Multi-Channel-Time-Encoding/Tests/test_time_encoder.py::TestTimeEncoderSingleSignalMultiChannel::()::test_TEM_can_reconstruct_standard_encoding_ex2",
+  "Multi-Channel-Time-Encoding/Tests/test_time_encoder.py::TestTimeEncoderSingleSignalMultiChannel::()::test_can_reconstruct_standard_encoding_with_recursive_mixing_alg",
+  "Multi-Channel-Time-Encoding/Tests/test_time_encoder.py::TestTimeEncoderMultiSignalMultiChannel::()::test_can_compute_q_matrix",
+  "Multi-Channel-Time-Encoding/Tests/test_time_encoder.py::TestTimeEncoderMultiSignalMultiChannel::()::test_can_reconstruct_standard_encoding_with_2_by_2_mixing_recursive",
+  "Multi-Channel-Time-Encoding/Tests/test_time_encoder.py::TestTimeEncoderMultiSignalMultiChannel::()::test_can_reconstruct_standard_encoding_with_3_by_2_mixing_recursive",
+  "Multi-Channel-Time-Encoding/Tests/test_time_encoder.py::TestTimeEncoderMultiSignalMultiChannel::()::test_can_reconstruct_precise_encoding_with_3_by_2_mixing_recursive",
+  "Multi-Channel-Time-Encoding/Tests/test_time_encoder.py::TestTimeEncoderMultiSignalMultiChannel::()::test_params_TEM_correct"
+]
