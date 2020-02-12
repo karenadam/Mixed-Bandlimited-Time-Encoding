@@ -27,7 +27,7 @@ def create_signal(num_signals, t, delta_t, Omega, sinc_padding):
     x_param = []
     for n in range(num_signals):
         x_param.append(bandlimitedSignal(Omega))
-        x_param[-1].random(t, padding = sinc_padding)
+        x_param[-1].random(t, padding=sinc_padding)
     return x_param
 
 
@@ -49,7 +49,7 @@ def get_params_for_spike_rate(x_param, t, A, end_time, num_spikes):
 
 
 def GetData():
-    # Settings for x
+    # Settings for x_param
     end_time = 20
     sinc_padding = 2
     delta_t = 1e-4
@@ -58,8 +58,8 @@ def GetData():
     seed = 0
     np.random.seed(int(seed))
     num_signals = 2
-    num_sincs = end_time - sinc_padding*2
-    total_deg_freedom = num_sincs*num_signals
+    num_sincs = end_time - sinc_padding * 2
+    total_deg_freedom = num_sincs * num_signals
 
     # Settings for time encoding machine
     num_channels = 3
@@ -71,35 +71,44 @@ def GetData():
     n_constraints_total = np.zeros_like(num_constraints_3_range)
     n_constraints_const = np.zeros_like(num_constraints_3_range)
     for n_s_r in range(len(num_constraints_3_range)):
-        n_constraints_const[n_s_r] = min(num_constraints_1, num_sincs)\
-            + min(num_constraints_2, num_sincs)\
+        n_constraints_const[n_s_r] = (
+            min(num_constraints_1, num_sincs)
+            + min(num_constraints_2, num_sincs)
             + min(num_constraints_3_range[n_s_r], num_sincs)
-        n_constraints_total[n_s_r] = num_constraints_1+num_constraints_2+num_constraints_3_range[n_s_r]
+        )
+        n_constraints_total[n_s_r] = (
+            num_constraints_1 + num_constraints_2 + num_constraints_3_range[n_s_r]
+        )
 
     # Settings for Simulation
     num_trials = 100
     results = np.zeros((num_trials, num_signals, len(num_constraints_3_range)))
 
     for n_t in range(num_trials):
-        print(n_t)
         x_param = create_signal(num_signals, t, delta_t, Omega, sinc_padding)
         for n_s_r in range(len(num_constraints_3_range)):
             b, kappa, delta = get_params_for_spike_rate(
-                x_param, t, A, end_time, [num_constraints_1,num_constraints_2,num_constraints_3_range[n_s_r]]
+                x_param,
+                t,
+                A,
+                end_time,
+                [num_constraints_1, num_constraints_2, num_constraints_3_range[n_s_r]],
             )
             res1, res2 = get_results(x_param, A, t, end_time, Omega, kappa, delta, b)
             results[n_t, 0, n_s_r] = res1
             results[n_t, 1, n_s_r] = res2
 
-    data_filename = Data_Path+"Figure3.pkl"
+    data_filename = Data_Path + "Figure3.pkl"
     with open(data_filename, "wb") as f:  # Python 3: open(..., 'wb')
-        pickle.dump([n_constraints_total, n_constraints_const, results, total_deg_freedom], f)
+        pickle.dump(
+            [n_constraints_total, n_constraints_const, results, total_deg_freedom], f
+        )
 
 
 def GenerateFigure():
 
-    data_filename = Data_Path+"Figure3.pkl"
-    figure_filename = Figure_Path+"Figure3.png"
+    data_filename = Data_Path + "Figure3.pkl"
+    figure_filename = Figure_Path + "Figure3.png"
 
     with open(data_filename, "rb") as f:  # Python 3: open(..., 'wb')
         obj = pickle.load(f, encoding="latin1")
@@ -114,11 +123,11 @@ def GenerateFigure():
 
     clr = plt.rcParams["axes.prop_cycle"].by_key()["color"]
     plt.figure(figsize=(8, 3))
-    plt.plot(n_constraints_total, np.mean(results[:, 0, :], 0), label=r'$x^{(0)}(t)$')
-    plt.plot(n_constraints_total, np.mean(results[:, 1, :], 0), label=r'$x^{(1)}(t)$')
-    plt.xlabel('Total number of constraints')
-    plt.ylabel('Reconstruction error')
-    plt.legend(loc = 'best')
+    plt.plot(n_constraints_total, np.mean(results[:, 0, :], 0), label=r"$x^{(0)}(t)$")
+    plt.plot(n_constraints_total, np.mean(results[:, 1, :], 0), label=r"$x^{(1)}(t)$")
+    plt.xlabel("Total number of constraints")
+    plt.ylabel("Reconstruction error")
+    plt.legend(loc="best")
     ax = plt.gca()
     ax.set_yscale("log")
     ax2 = ax.twiny()
@@ -130,14 +139,14 @@ def GenerateFigure():
     ax = plt.gca()
     ax.set_yscale("log")
     ax2.axvline(total_deg_freedom, color="red")
-    plt.xlabel('Number of useful constraints')
-    plt.ylabel('Reconstruction Error')
+    plt.xlabel("Number of useful constraints")
+    plt.ylabel("Reconstruction Error")
     plt.tight_layout()
     plt.savefig(figure_filename)
 
 
 if __name__ == "__main__":
-    data_filename = Data_Path+"Figure3.pkl"
+    data_filename = Data_Path + "Figure3.pkl"
 
     if not os.path.isfile(data_filename):
         GetData()
