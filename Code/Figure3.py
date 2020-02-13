@@ -7,7 +7,7 @@ def get_results(x_param, A, t, end_time, Omega, kappa, delta, b):
     num_channels = len(A)
     delta_t = t[1] - t[0]
     tem_mult = timeEncoder(kappa, delta, b, A)
-    spikes = tem_mult.encode_precise(x_param, Omega, end_time, tol=1e-10)
+    spikes = tem_mult.encode_precise(x_param, Omega, end_time, tol=1e-10, with_start_time = True)
     rec_mult = tem_mult.decode_mixed(
         spikes, t, x_param[0].get_sinc_locs(), Omega, delta_t
     )
@@ -43,7 +43,7 @@ def get_params_for_spike_rate(x_param, t, A, end_time, num_spikes):
     delta = [1] * n_channels
     kappadelta = [2 * kappa[l] * delta[l] for l in range(n_channels)]
     for m in range(n_channels):
-        needed_integral = (num_spikes[m] + 0.6) * kappadelta[m]
+        needed_integral = (num_spikes[m] +0.6) * kappadelta[m]
         b[m] = (needed_integral - y_ints[m, 0]) / end_time
     return b, kappa, delta
 
@@ -65,34 +65,35 @@ def GetData():
     num_channels = 3
     A = [[0.4, 1], [0.3, -0.2], [1, 0.7]]
 
-    num_constraints_1 = 12
-    num_constraints_2 = 8
-    num_constraints_3_range = np.arange(2, 21, 1)
-    n_constraints_total = np.zeros_like(num_constraints_3_range)
-    n_constraints_const = np.zeros_like(num_constraints_3_range)
-    for n_s_r in range(len(num_constraints_3_range)):
-        n_constraints_const[n_s_r] = (
-            min(num_constraints_1, num_sincs)
-            + min(num_constraints_2, num_sincs)
-            + min(num_constraints_3_range[n_s_r], num_sincs)
+    num_spikes_1 = 12
+    num_spikes_2 = 8
+    num_spikes_3_range = np.arange(2, 21, 1)
+    n_spikes_total = np.zeros_like(num_spikes_3_range)
+    n_spikes_constrained = np.zeros_like(num_spikes_3_range)
+    for n_s_r in range(len(num_spikes_3_range)):
+        n_spikes_constrained[n_s_r] = (
+            min(num_spikes_1, num_sincs)
+            + min(num_spikes_2, num_sincs)
+            + min(num_spikes_3_range[n_s_r], num_sincs)
         )
-        n_constraints_total[n_s_r] = (
-            num_constraints_1 + num_constraints_2 + num_constraints_3_range[n_s_r]
+        n_spikes_total[n_s_r] = (
+            num_spikes_1 + num_spikes_2 + num_spikes_3_range[n_s_r]
         )
 
     # Settings for Simulation
     num_trials = 100
-    results = np.zeros((num_trials, num_signals, len(num_constraints_3_range)))
+    results = np.zeros((num_trials, num_signals, len(num_spikes_3_range)))
 
     for n_t in range(num_trials):
+        print(n_t)
         x_param = create_signal(num_signals, t, delta_t, Omega, sinc_padding)
-        for n_s_r in range(len(num_constraints_3_range)):
+        for n_s_r in range(len(num_spikes_3_range)):
             b, kappa, delta = get_params_for_spike_rate(
                 x_param,
                 t,
                 A,
                 end_time,
-                [num_constraints_1, num_constraints_2, num_constraints_3_range[n_s_r]],
+                [num_spikes_1, num_spikes_2, num_spikes_3_range[n_s_r]],
             )
             res1, res2 = get_results(x_param, A, t, end_time, Omega, kappa, delta, b)
             results[n_t, 0, n_s_r] = res1
@@ -101,45 +102,47 @@ def GetData():
     data_filename = Data_Path + "Figure3.pkl"
     with open(data_filename, "wb") as f:  # Python 3: open(..., 'wb')
         pickle.dump(
-            [n_constraints_total, n_constraints_const, results, total_deg_freedom], f
+            [n_spikes_total, n_spikes_constrained, results, total_deg_freedom], f
         )
 
 
 def GenerateFigure():
 
     data_filename = Data_Path + "Figure3.pkl"
-    figure_filename = Figure_Path + "Figure3.png"
+    if To_Svg:
+        figure_filename = Figure_Path + "Figure3.svg"
+    else:
+        figure_filename = Figure_Path + "Figure3.png"
 
     with open(data_filename, "rb") as f:  # Python 3: open(..., 'wb')
         obj = pickle.load(f, encoding="latin1")
 
-    n_constraints_total = obj[0]
-    n_constraints_const = obj[1]
+    n_spikes_total = obj[0]
+    n_spikes_constrained = obj[1]
     results = obj[2]
     num_signals = results.shape[1]
     total_deg_freedom = obj[3]
 
-    plt.rc("text", usetex=True)
 
     clr = plt.rcParams["axes.prop_cycle"].by_key()["color"]
     plt.figure(figsize=(8, 3))
-    plt.plot(n_constraints_total, np.mean(results[:, 0, :], 0), label=r"$x^{(0)}(t)$")
-    plt.plot(n_constraints_total, np.mean(results[:, 1, :], 0), label=r"$x^{(1)}(t)$")
-    plt.xlabel("Total number of constraints")
+    plt.plot(n_spikes_total, np.mean(results[:, 0, :], 0), label=r"$x^{(0)}(t)$")
+    plt.plot(n_spikes_total, np.mean(results[:, 1, :], 0), label=r"$x^{(1)}(t)$")
+    plt.xlabel("Total number of spikes")
     plt.ylabel("Reconstruction error")
-    plt.legend(loc="best")
+    plt.legend(loc="best", prop={'size':20})
     ax = plt.gca()
     ax.set_yscale("log")
     ax2 = ax.twiny()
     ax2.set_xlim(ax.get_xlim())
-    ax.set_xticks(n_constraints_total[0::2])
-    ax.set_xticklabels(n_constraints_total[0::2])
-    ax2.set_xticks(n_constraints_total[0::2])
-    ax2.set_xticklabels(n_constraints_const[0::2])
+    ax.set_xticks(n_spikes_total[0::2])
+    ax.set_xticklabels(n_spikes_total[0::2])
+    ax2.set_xticks(n_spikes_total[0::2])
+    ax2.set_xticklabels(n_spikes_constrained[0::2])
     ax = plt.gca()
     ax.set_yscale("log")
-    ax2.axvline(total_deg_freedom, color="red")
-    plt.xlabel("Number of useful constraints")
+    ax2.axvline(total_deg_freedom, color=clr[2], linestyle = '--')
+    plt.xlabel("Constrained number of spikes")
     plt.ylabel("Reconstruction Error")
     plt.tight_layout()
     plt.savefig(figure_filename)
